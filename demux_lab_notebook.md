@@ -49,8 +49,10 @@ The read length for the indexes is 9 - 1, so read length is 8.
 
 If the data was Phred+64 encoded, the quality score lines would include lowercase letters indicating high decimal values, as when converting ABSCII to Phred score, the values would be high enough to subtract 64 from. 
 I searched for lowercase letters in the quality score lines on the index file to reduce runtime as they have shorter sequences.
-```zcat 1294_S1_L008_R2_001.fastq.gz | sed -n 4~4p | grep -E "[a-z]+"```
 ```
+zcat 1294_S1_L008_R2_001.fastq.gz | sed -n 4~4p | grep -E "[a-z]+"
+```
+
 No output was found, so this data is Phred+33 encoded.
 
 I created the python script demux_processing.py to generate histograms of mean quality scores.
@@ -79,27 +81,28 @@ Ran the script on the test file.
 Added argparse arguments to specify read length and file.
 
 PS9 attempt (ended up going back to PS4): 
-# def populate_array(file): 
-#     """Opens a FASTQ file and decodes Phred quality scores to numbers
-#     accounting for Phred+33. Sums the quality scores for each position
-#     and counts the total number of lines in the FASTQ file.
-#     Returns the array and line count."""
-#     # qscores = [0] * args.read_len
-#     with gzip.open(file, 'r') as fq:
-#         pos = 0
-#         line_count = 0
-#         for line in fq:
-#             line = line.decode('ASCII')
-#             line = line.strip('\n')
-#             line_count += 1
-#             # obtain lines with quality scores
-#             if line_count % 4 == 0:
-#                 # specify for position when converting phred score
-#                 for letter in range(len(line)):
-#                     qscores[letter, pos] = bioinfo.convert_phred(line[letter])
-#                 pos +=1
-#     return (qscores, line_count)
-
+```
+def populate_array(file): 
+     """Opens a FASTQ file and decodes Phred quality scores to numbers
+     accounting for Phred+33. Sums the quality scores for each position
+     and counts the total number of lines in the FASTQ file.
+     Returns the array and line count."""
+     # qscores = [0] * args.read_len
+     with gzip.open(file, 'r') as fq:
+         pos = 0
+         line_count = 0
+         for line in fq:
+             line = line.decode('ASCII')
+             line = line.strip('\n')
+             line_count += 1
+             # obtain lines with quality scores
+             if line_count % 4 == 0:
+                 # specify for position when converting phred score
+                 for letter in range(len(line)):
+                     qscores[letter, pos] = bioinfo.convert_phred(line[letter])
+                 pos +=1
+     return (qscores, line_count)
+```
 I made the script processing.srun to run demux_processing.py on talapas as its a python script, and changed the permissions. 
     chmod 755 processing.srun
 
@@ -138,10 +141,12 @@ Command being timed: "./demux_processing.py -r 101 -f /projects/bgmp/shared/2017
 Decided on a quality score cut off of 30, as it is typical for selecting high quality data. Also looking at the output histograms, most of the averages were around or above 30, so having a lower threshold likely wouldn't make a major difference in our data. The indexes have only 8 bases, and we discard the read if there's one N, so it makes sense to discard a read that has one low quality value. We are looking at individual qscores rather than the average per read, as higher quality scores may skew the average, and include a lower quality read.
 
 N: amount of indexes that have N's in index files
-```zcat 1294_S1_L008_R2_001.fastq.gz | sed -n 2~4p | grep "N" | wc -l```
+```
+zcat 1294_S1_L008_R2_001.fastq.gz | sed -n 2~4p | grep "N" | wc -l
 ```
 3976613
-```zcat 1294_S1_L008_R3_001.fastq.gz | sed -n 2~4p | grep "N" | wc -l
+```
+zcat 1294_S1_L008_R3_001.fastq.gz | sed -n 2~4p | grep "N" | wc -l
 ```
 3328051
 
