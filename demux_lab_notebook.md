@@ -145,6 +145,8 @@ N: amount of indexes that have N's in index files
 ```
 3328051
 
+Total indexes with N's: 3976613 + 3328051 = 7304664
+
 **27 July 2022**
 
 Worked on part 2.
