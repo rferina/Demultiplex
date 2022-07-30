@@ -96,39 +96,6 @@ def oneline_fasta(file):
     return len(seq_dict)
 
 
-def init_list(lst: list, value: float=0.0) -> list:
-    '''This function takes an empty list and will populate it with
-    the value passed in "value". If no value is passed, initializes list
-    with 101 values of 0.0.'''
-    # account for no value parameter entered
-    if len(lst) == 0:
-        lst = [0.0] * 101
-    else:
-        lst = [value] * 101
-    return lst
-
-
-def populate_list(file: str) -> tuple[list, int]:
-    """Opens a FASTQ file and decodes Phred quality scores to numbers
-    accounting for Phred+33. Sums the quality scores for each position
-    and counts the total number of lines in the FASTQ file.
-    Returns the array and line count."""
-
-    lst = init_list([])
-    with open(file, 'r') as fq:
-        line_count = 0
-        for line in fq:
-            line = line.strip('\n')
-            line_count += 1
-            # obtain lines with quality scores
-            if line_count % 4 == 0:
-                # specify for position when converting phred score
-                for count, letter in enumerate(line):
-                    lst[count] += bioinfo.convert_phred(letter)
-    return (lst, line_count)
-
-
-
 
 if __name__ == "__main__":
     # write tests for functions above

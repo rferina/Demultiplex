@@ -1,39 +1,3 @@
-# Assignment the First
-
-## Part 1
-1. Be sure to upload your Python script.
-
-| File name | Label | Read length | Phred encoding |
-|---|---|---|---|
-| 1294_S1_L008_R1_001.fastq.gz | Read 1 | 101 | +33  |
-| 1294_S1_L008_R2_001.fastq.gz | Index 1 | 8 | +33 |
-| 1294_S1_L008_R3_001.fastq.gz | Index 2 | 8 | +33 |
-| 1294_S1_L008_R4_001.fastq.gz | Read 2 | 101 | +33 |
-
-2. Per-base NT distribution
-    1. Use markdown to insert your 4 histograms here.
-    2. **Read1**
-    ![read1](1294_S1_L008_R1_001_dist.png)
-    3. **Index1**
-    ![index1](1294_S1_L008_R2_001_dist.png)
-    4. **Index2**
-    ![index2](1294_S1_L008_R3_001_dist.png)
-    5. **Read2**
-    ![read2](1294_S1_L008_R4_001_dist.png)
-    
-## Part 2
-1. Define the problem
-
-**We need to ensure that the reads have valid matching indexes, and filter out low quality data and data where index hopping occurred.**
-
-2. Describe output
-
-**It will output 52 files, 24 for read 1 with matching indexes, 24 for read 2 with matching indexes, 1 for read 1 unmatching indexes, 1 for read 2 unmatching indexes, 1 for read 1 unknown or low quality, and 1 for read2 unknown or low quality. It will return the counts of records for matching indexes, unmatching indexes and unknown or low quality indexes.**
-
-3. Upload your [4 input FASTQ files](../TEST-input_FASTQ) and your [>=6 expected output FASTQ files](../TEST-output_FASTQ).
-4. Pseudocode
-
-```
 Make a set of 24 known forward indexes.
 
 Open all 4 input FASTQ files, read each line by line. 
@@ -73,11 +37,7 @@ print out matched counter, unmatched counter, unknown counter
 
 
 
-5. High level functions. For each function, be sure to include:
-    1. Description/doc string
-    2. Function headers (name and parameters)
-    3. Test examples for individual functions
-    4. Return statement
+High level functions:
 
 def convert_phred(letter):
     ```
@@ -129,5 +89,3 @@ def write_out(filename, line_1, line_2, line_3, line_4):
 
 input: 'AA_matched.fq', '@K4661:22:17', '+', 'GCATTAC', '#AAFAAFJJ' expected output: AA_matched.fq with that record in it
 path.exists('AA_matched.fq') == True
-
-
