@@ -24,7 +24,7 @@
 ## Part 2
 1. Define the problem
 
-**We need to ensure that the reads have valid matching indexes, and filter out low quality data and data where index hopping occurred.**
+**Multiplexing is when several samples are libraries are run together to take advantage of amassive parallel sequencer. However, the samples need to be demultiplexed to know what sequences are from which samples. Demultiplexing is done by using the unique index or barcode to determine the sample a sequence is associated with. We also need to ensure that the reads have valid matching indexes, and filter out low quality data and data where index hopping occurred. Dual matching indexes allow us to observe when index-hopping occurred, as they won't match (after taking the reverse complement of one index) if it did. Index hopping is an issue especially when looking at samples with low occurrence. We only want to include high quality data so that we have confidence that the sequencing was accurate.**
 
 2. Describe output
 
