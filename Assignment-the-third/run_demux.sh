@@ -4,7 +4,7 @@
 #SBATCH --job-name=demux_%j      ### Job Name
 #SBATCH --output=demux_%j.out         ### File in which to store job output
 #SBATCH --error=demux_%j.err          ### File in which to store job error messages
-#SBATCH --time=0-10:00:00       ### Wall clock time limit in Days-HH:MM:SS
+#SBATCH --time=0-16:00:00       ### Wall clock time limit in Days-HH:MM:SS
 #SBATCH --nodes=1               ### Number of nodes needed for the job
 #SBATCH --ntasks-per-node=1     ### Number of tasks to be launched per Node
 #SBATCH --account=bgmp      ### Account used for job submission

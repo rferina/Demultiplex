@@ -28,7 +28,7 @@ with open(args.validindexfilename) as real_indexes:
         # columns = line.split('\t')
         columns = line.split()
         valid_indexes.add(columns[4])
-
+# print(valid_indexes)
 
 def modify_header(line_1, index_1, index_2):
     '''
@@ -55,8 +55,8 @@ def write_out(filename, line_1, line_2, line_3, line_4):
 files_dict = {}
 for index in valid_indexes:
     files_dict[index] = [open(f'{args.outputdirectory}/{index}_r1_matched.fq', 'w'), open(f'{args.outputdirectory}/{index}_r2_matched.fq', 'w')]
-    files_dict['unmatched'] = [open(f'{args.outputdirectory}/R1_unmatched.fq', 'w'), open(f'{args.outputdirectory}/R2_unmatched.fq', 'w')]
-    files_dict['unknown'] = [open(f'{args.outputdirectory}/R1_unknown.fq', 'w'), open(f'{args.outputdirectory}/R2_unknown.fq', 'w')]
+    files_dict['unmatched'] = [open(f'{args.outputdirectory}/r1_unmatched.fq', 'w'), open(f'{args.outputdirectory}/r2_unmatched.fq', 'w')]
+    files_dict['unknown'] = [open(f'{args.outputdirectory}/r1_unknown.fq', 'w'), open(f'{args.outputdirectory}/r2_unknown.fq', 'w')]
 
 
 # count the frequencies of matched indexes
@@ -79,7 +79,7 @@ with gzip.open(args.read1filename, 'rt') as read1:
                 unmatched_count = 0
                 #  if the file still has reads, continue looping
                 while True:
-                    # get record for read1, index1, index2 and read2 files, maybe put in function later?
+                    # get a record for read1, index1, index2 and read2 files
                     # get header read1 line, strip newline
                     header_r1 = read1.readline().strip('\n')
                     # get header for index1 file
@@ -177,16 +177,27 @@ plt.savefig('frequency.png')
 
 # graph index hopping distribution
 unmatch_index_keys = list(unmatched_index_dict.keys())
-unmatch_values = list(unmatch_index_keys.values())
+unmatch_values = list(unmatched_index_dict.values())
 fig, ax = plt.subplots(1, figsize=(15,10))
 ax.bar(unmatch_index_keys, unmatch_values, width=0.9, color='#87CEEB')    
 plt.ylabel("Frequency", size=18)
 plt.yticks(fontsize=15)
 plt.xlabel("Index", size=18)
-plt.xticks(fontsize=15)
+plt.xticks(fontsize=15, rotation=45, ha="right")
 plt.title("Frequency of Index Hopping", size=20) 
 plt.savefig('hopping_dist.png')
 
+# graph index matching distribution
+match_index_keys = list(index_count_dict.keys())
+match_values = list(index_count_dict.values())
+fig, ax = plt.subplots(1, figsize=(15,10))
+ax.bar(match_index_keys, match_values, width=0.9, color='#87CEEB')    
+plt.ylabel("Frequency", size=18)
+plt.yticks(fontsize=15)
+plt.xlabel("Index", size=18)
+plt.xticks(fontsize=15, rotation=45, ha="right")
+plt.title("Frequency of Index Hopping", size=20) 
+plt.savefig('matching_dist.png')
 
 #for loop to close matched output files             
 for filename in files_dict.values():
