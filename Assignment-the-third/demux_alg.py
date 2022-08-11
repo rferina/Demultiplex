@@ -25,10 +25,8 @@ with open(args.validindexfilename) as real_indexes:
     for line in real_indexes:
         line = line.strip('\n')
         line = str(line)
-        # columns = line.split('\t')
         columns = line.split()
         valid_indexes.add(columns[4])
-# print(valid_indexes)
 
 def modify_header(line_1, index_1, index_2):
     '''
@@ -100,68 +98,87 @@ with gzip.open(args.read1filename, 'rt') as read1:
                         read2_record = np.array([header_r2.strip('\n'), read2.readline().strip('\n'),  read2.readline().strip('\n'),  read2.readline().strip('\n')])
                         # calculate the reverse complement of index 2
                         rev_comp_index2 = bioinfo.reverse_complement(index2_record[1])
-                        
-                        # if one index is valid, see if the other index matches it
-                        if index1_record[1] in valid_indexes or rev_comp_index2 in valid_indexes:                  
-                            # if not matching, write to unmatched
-                            if index1_record[1] != rev_comp_index2:
-                                    # r1_indexes_header = modify_header(read1_record[0], index1_record[1], index2_record[1])
-                                    r1_indexes_header = modify_header(read1_record[0], index1_record[1], rev_comp_index2)
-                                    write_out(files_dict['unmatched'][0], r1_indexes_header, read1_record[1], read1_record[2], read1_record[3])
-                                    # r2_indexes_header = modify_header(read2_record[0], index1_record[1], index2_record[1])
-                                    r2_indexes_header = modify_header(read2_record[0], index1_record[1], rev_comp_index2)
-                                    write_out(files_dict['unmatched'][1], r2_indexes_header, read2_record[1], read2_record[2], read2_record[3])
-                                    unmatched_count += 1
-                                    # count times an index has a mismatch for index1
-                                    if index1_record[1] in unmatched_index_dict:
-                                        unmatched_index_dict[index1_record[1]] += 1
-                                    # count times an index has a mismatch for index2
-                                    if rev_comp_index2 in unmatched_index_dict:
-                                        unmatched_index_dict[rev_comp_index2] += 1
-                            # indexes are matching
-                            elif index1_record[1] == rev_comp_index2:
-                            # check if index1 or index2 doesn't meet quality score cutoff of 30
-                                if bioinfo.qual_score(index1_record[3]) < 30 or bioinfo.qual_score(index2_record[3]) < 30:
-                                    # r1_indexes_header = modify_header(read1_record[0], index1_record[1], index2_record[1])
-                                    r1_indexes_header = modify_header(read1_record[0], index1_record[1], rev_comp_index2)
-                                    write_out(files_dict['unknown'][0], r1_indexes_header, read1_record[1], read1_record[2], read1_record[3])
-                                    # r2_indexes_header = modify_header(read2_record[0], index1_record[1], index2_record[1])
-                                    r2_indexes_header = modify_header(read2_record[0], index1_record[1], rev_comp_index2)
-                                    write_out(files_dict['unknown'][1], r2_indexes_header, read2_record[1], read2_record[2], read2_record[3])
-                                # now qual score aves are >= 30, and indexes are matching
-                                else:
-                                    for a_key in files_dict:
-                                        if index1_record[1] == a_key:
-                                            # r1_indexes_header = modify_header(read1_record[0], index1_record[1], index2_record[1])
-                                            r1_indexes_header = modify_header(read1_record[0], index1_record[1], rev_comp_index2)
-                                            write_out(files_dict[index1_record[1]][0], r1_indexes_header, read1_record[1], read1_record[2], read1_record[3])
-                                            # r2_indexes_header = modify_header(read2_record[0], index1_record[1], index2_record[1])
-                                            r2_indexes_header = modify_header(read2_record[0], index1_record[1], rev_comp_index2)
-                                            write_out(files_dict[index1_record[1]][1], r2_indexes_header, read2_record[1], read2_record[2], read2_record[3])
-                                    # count the frequency of matching indexes
-                                    if index1_record[1] in index_count_dict:
-                                        index_count_dict[index1_record[1]] += 1
-                        # indexes are invalid            
-                        else:
-                            # r1_indexes_header = modify_header(read1_record[0], index1_record[1], index2_record[1])
+                        # if index 1 is invalid, the read is invalid, write to unknown file
+                        if index1_record[1] not in valid_indexes: 
                             r1_indexes_header = modify_header(read1_record[0], index1_record[1], rev_comp_index2)
                             write_out(files_dict['unknown'][0], r1_indexes_header, read1_record[1], read1_record[2], read1_record[3])
-                            # r2_indexes_header = modify_header(read2_record[0], index1_record[1], index2_record[1])
                             r2_indexes_header = modify_header(read2_record[0], index1_record[1], rev_comp_index2)
                             write_out(files_dict['unknown'][1], r2_indexes_header, read2_record[1], read2_record[2], read2_record[3])
                             unknown_count += 1
-# calculate percentages of matched indexes
+                        # if reverse complement of index 2 is invalid, the read is invalid, write to unknown file
+                        elif rev_comp_index2 not in valid_indexes:
+                            r1_indexes_header = modify_header(read1_record[0], index1_record[1], rev_comp_index2)
+                            write_out(files_dict['unknown'][0], r1_indexes_header, read1_record[1], read1_record[2], read1_record[3])
+                            r2_indexes_header = modify_header(read2_record[0], index1_record[1], rev_comp_index2)
+                            write_out(files_dict['unknown'][1], r2_indexes_header, read2_record[1], read2_record[2], read2_record[3])
+                            unknown_count += 1
+                        # if both indexes are valid, see if the indexes pass the quality score cutoff of 30
+                        elif index1_record[1] in valid_indexes and rev_comp_index2 in valid_indexes:   
+                            # check if index1 doesn't meet quality score cutoff of 30
+                            if bioinfo.qual_score(index1_record[3]) < 30:
+                                r1_indexes_header = modify_header(read1_record[0], index1_record[1], rev_comp_index2)
+                                write_out(files_dict['unknown'][0], r1_indexes_header, read1_record[1], read1_record[2], read1_record[3])
+                                r2_indexes_header = modify_header(read2_record[0], index1_record[1], rev_comp_index2)
+                                write_out(files_dict['unknown'][1], r2_indexes_header, read2_record[1], read2_record[2], read2_record[3])
+                                unknown_count += 1
+                            # check if index2 doesn't meet quality score cutoff of 30
+                            elif bioinfo.qual_score(index2_record[3]) < 30:
+                                r1_indexes_header = modify_header(read1_record[0], index1_record[1], rev_comp_index2)
+                                write_out(files_dict['unknown'][0], r1_indexes_header, read1_record[1], read1_record[2], read1_record[3])
+                                r2_indexes_header = modify_header(read2_record[0], index1_record[1], rev_comp_index2)
+                                write_out(files_dict['unknown'][1], r2_indexes_header, read2_record[1], read2_record[2], read2_record[3])
+                                unknown_count += 1
+                            # now that both indexes are equal to or above quality score cutoff, see if index 1 matches rev comp index 2               
+                            # if not matching, write to unmatched
+                            elif index1_record[1] != rev_comp_index2:
+                                r1_indexes_header = modify_header(read1_record[0], index1_record[1], rev_comp_index2)
+                                write_out(files_dict['unmatched'][0], r1_indexes_header, read1_record[1], read1_record[2], read1_record[3])                                    
+                                r2_indexes_header = modify_header(read2_record[0], index1_record[1], rev_comp_index2)
+                                write_out(files_dict['unmatched'][1], r2_indexes_header, read2_record[1], read2_record[2], read2_record[3])
+                                unmatched_count += 1
+                                # count times an index has a mismatch for index1
+                                if index1_record[1] in unmatched_index_dict:
+                                    unmatched_index_dict[index1_record[1]] += 1
+                                # count times an index has a mismatch for index2
+                                if rev_comp_index2 in unmatched_index_dict:
+                                    unmatched_index_dict[rev_comp_index2] += 1
+                            # indexes are matching; passed quality score cutoff
+                            elif index1_record[1] == rev_comp_index2:           
+                                for a_key in files_dict:
+                                    if index1_record[1] == a_key:
+                                        r1_indexes_header = modify_header(read1_record[0], index1_record[1], rev_comp_index2)
+                                        write_out(files_dict[index1_record[1]][0], r1_indexes_header, read1_record[1], read1_record[2], read1_record[3])
+                                        r2_indexes_header = modify_header(read2_record[0], index1_record[1], rev_comp_index2)
+                                        write_out(files_dict[index1_record[1]][1], r2_indexes_header, read2_record[1], read2_record[2], read2_record[3])
+                                # count the frequency of matching indexes
+                                if index1_record[1] in index_count_dict:
+                                    index_count_dict[index1_record[1]] += 1
+                        
+                            
+# find the total number of matched indexes 
 total_matched = sum(index_count_dict.values())
+# find the total reads in the file
+total_count = total_matched + unmatched_count + unknown_count
 index_percentages = {}
+# calculate percentages of matched indexes over all reads
 for index in index_count_dict: 
-    index_percentages[index] = index_count_dict[index] / total_matched * 100
+    index_percentages[index] = index_count_dict[index] / total_count * 100
 # Return unmatched and unknown counts, matched dictionary counts, stats                           
 print('Number of unmatched records:', unmatched_count)
 print('Number of unknown records:', unknown_count) 
 print('Number of total matched records:', total_matched)
+print('Total Number of Records:', total_count)
+print('Unmatched index counts:', unmatched_index_dict)
 print('Matched index counts:', index_count_dict)
 print('Matched index percentages:', index_percentages)
-print('Unmatched:', unmatched_index_dict)
+
+
+# graph pie chart with percentages of reads from each matched index
+index_perc = list(index_percentages.values())
+index_labels = list(index_percentages.keys())
+plt.pie(index_perc, labels=index_labels, autopct='%1.1f%%', rotatelabels=True)
+plt.title("Percentages of Valid Reads from Each Index", size=15, pad=28) 
+plt.savefig('valid_reads.png')
 
 # graph frequency distribution
 read_type = ['Matched', 'Unmatched', 'Unknown']
@@ -196,7 +213,7 @@ plt.ylabel("Frequency", size=18)
 plt.yticks(fontsize=15)
 plt.xlabel("Index", size=18)
 plt.xticks(fontsize=15, rotation=45, ha="right")
-plt.title("Frequency of Index Hopping", size=20) 
+plt.title("Frequency of Matched Indexes", size=20) 
 plt.savefig('matching_dist.png')
 
 #for loop to close matched output files             
