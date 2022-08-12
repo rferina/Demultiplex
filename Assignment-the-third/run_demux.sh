@@ -7,7 +7,7 @@
 #SBATCH --time=0-16:00:00       ### Wall clock time limit in Days-HH:MM:SS
 #SBATCH --nodes=1               ### Number of nodes needed for the job
 #SBATCH --ntasks-per-node=1     ### Number of tasks to be launched per Node
-#SBATCH --cpus-per-task=12 ### Number of cpus per task
+#SBATCH --cpus-per-task=12     ### Number of cpus per task
 #SBATCH --account=bgmp      ### Account used for job submission
 
 results='/projects/bgmp/rferina/bioinfo/Bi622/demux/Demultiplex/Assignment-the-third/results'

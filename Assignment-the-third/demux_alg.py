@@ -18,7 +18,7 @@ def get_args():
 
 args = get_args()
 
-# open index file, place in set
+# open index file, place indexes in set
 with open(args.validindexfilename) as real_indexes:
     valid_indexes = set()
     real_indexes.readline()
@@ -27,6 +27,7 @@ with open(args.validindexfilename) as real_indexes:
         line = str(line)
         columns = line.split()
         valid_indexes.add(columns[4])
+
 
 def modify_header(line_1, index_1, index_2):
     '''
@@ -59,13 +60,10 @@ for index in valid_indexes:
 
 # count the frequencies of matched indexes
 index_count_dict = {}
-for index in valid_indexes:
-    index_count_dict[index] = 0
 
 # count the frequencies of unmatched indexes
 unmatched_index_dict = {}
-for index in valid_indexes:
-    unmatched_index_dict[index] = 0
+
 
 # open input FASTQ files, using rt to read the gzipped files
 with gzip.open(args.read1filename, 'rt') as read1:
@@ -136,12 +134,11 @@ with gzip.open(args.read1filename, 'rt') as read1:
                                 r2_indexes_header = modify_header(read2_record[0], index1_record[1], rev_comp_index2)
                                 write_out(files_dict['unmatched'][1], r2_indexes_header, read2_record[1], read2_record[2], read2_record[3])
                                 unmatched_count += 1
-                                # count times an index has a mismatch for index1
-                                if index1_record[1] in unmatched_index_dict:
-                                    unmatched_index_dict[index1_record[1]] += 1
-                                # count times an index has a mismatch for index2
-                                if rev_comp_index2 in unmatched_index_dict:
-                                    unmatched_index_dict[rev_comp_index2] += 1
+                                # count how many mismatches
+                                if str(index1_record[1] + rev_comp_index2) in unmatched_index_dict:
+                                    unmatched_index_dict[str(index1_record[1] + ':' + rev_comp_index2)] += 1
+                                else:
+                                    unmatched_index_dict[str(index1_record[1] + ':' + rev_comp_index2)] = 1
                             # indexes are matching; passed quality score cutoff
                             elif index1_record[1] == rev_comp_index2:           
                                 for a_key in files_dict:
@@ -153,6 +150,8 @@ with gzip.open(args.read1filename, 'rt') as read1:
                                 # count the frequency of matching indexes
                                 if index1_record[1] in index_count_dict:
                                     index_count_dict[index1_record[1]] += 1
+                                else:
+                                    index_count_dict[index1_record[1]] = 1
                         
                             
 # find the total number of matched indexes 

@@ -16,8 +16,9 @@ __version__ = "0.7"         # Read way more about versioning here:
 from lib2to3.pytree import convert
 from xmlrpc.client import boolean
 
-DNA_bases = "AGTCCCATGGCCCNNA"
+DNA_bases = "AGTCCCATGGCFCCNNA"
 RNA_bases = "UUACGAGGUUAUAGNU"
+
 
 def convert_phred(letter: str) -> int:
     """Inputs a single character, and returns it as a phred score."""
@@ -41,16 +42,16 @@ def qual_score(phred_score: str) -> float:
 
 def validate_base_seq(seq: str, RNAflag: bool=False) -> bool:
     '''Takes in a string of DNA or RNA. Returns True if string has
-    only As, Gs, Cs and Ts (or Us if RNAflag), otherwise returns False. Case insensitive.'''
+    only As, Gs, Cs, Ns, and Ts (or Us if RNAflag), otherwise returns False. Case insensitive.'''
     # make sequence uppercase
     seq = seq.upper()
     # if the sequence isn't RNA, count AGTC and see if equal to length of sequence
     if RNAflag == False:
-        if seq.count('A') + seq.count('G') + seq.count('T') + seq.count('C') == len(seq):
+        if seq.count('A') + seq.count('G') + seq.count('T') + seq.count('C') + seq.count('N') == len(seq):
             return True
     # if the sequence is RNA, count AGUC and see if equal to length of sequence
     else:
-        if seq.count('A') + seq.count('G') + seq.count('U') + seq.count('C') == len(seq):
+        if seq.count('A') + seq.count('G') + seq.count('U') + seq.count('C') + seq.count('N') == len(seq):
             return True
     return False
 
@@ -95,7 +96,7 @@ def oneline_fasta(file):
     return len(seq_dict)
 
 
-def reverse_complement(str):
+def reverse_complement(DNA_str: str) -> str:
     '''
     Takes in a string of a DNA sequence, and returns the reverse
     complement of the sequence in a new string. N's don't have
@@ -104,10 +105,10 @@ def reverse_complement(str):
     rev_str = ''
     comp_dict = {'G': 'C', 'C': 'G', 'A': 'T', 'T': 'A', 'N': 'N'}
     comp_list = []
-    position = len(str)
-    for nuc in range(len(str)):
+    position = len(DNA_str)
+    for nuc in range(len(DNA_str)):
         position -= 1
-        rev_str += str[position]
+        rev_str += DNA_str[position]
     for base in rev_str:
         comp_list.append(comp_dict[base])
     rev_comp = ''.join(comp_list)
@@ -125,11 +126,13 @@ if __name__ == "__main__":
     assert qual_score('HJIC2@JFFH$$') == 30.166666666666668, "qual_score produced incorrect average"
     print('passed qual_score test')
 
-    assert validate_base_seq("ACTCGCCT", False) == True, "Validate base seq does not work on DNA"
+    assert validate_base_seq("ACTCGCCT") == True, "Validate base seq does not work on DNA"
+    assert validate_base_seq("ACNNGCNT") == True, "Validate base seq does not work on DNA with N"
     assert validate_base_seq("UACAUG", True) == True, "Validate base seq does not work on RNA"
-    assert validate_base_seq("CTGUUA",False) == False, "Validate base seq worked on invalid sequence"
-    assert validate_base_seq(DNA_bases, False) == False, 'Validate base seq does not work on DNA_bases'
-    assert validate_base_seq(RNA_bases, True) == False, 'Validate base seq does not work on DNA_bases'
+    assert validate_base_seq("UANNNG", True) == True, "Validate base seq does not work on RNA with N"
+    assert validate_base_seq("CTGUUA") == False, "Validate base seq worked on invalid sequence"
+    assert validate_base_seq(DNA_bases) == False, 'Validate base seq does not work on DNA_bases'
+    assert validate_base_seq(RNA_bases, True) == True, 'Validate base seq does not work on RNA_bases'
     print('validate_base_seq passed DNA and RNA tests')
 
     assert gc_content("GCGCCCG") == 1
