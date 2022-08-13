@@ -135,10 +135,10 @@ with gzip.open(args.read1filename, 'rt') as read1:
                                 write_out(files_dict['unmatched'][1], r2_indexes_header, read2_record[1], read2_record[2], read2_record[3])
                                 unmatched_count += 1
                                 # count how many mismatches
-                                if str(index1_record[1] + rev_comp_index2) in unmatched_index_dict:
-                                    unmatched_index_dict[str(index1_record[1] + ':' + rev_comp_index2)] += 1
+                                if index1_record[1] in unmatched_index_dict:
+                                    unmatched_index_dict[index1_record[1]] += 1
                                 else:
-                                    unmatched_index_dict[str(index1_record[1] + ':' + rev_comp_index2)] = 1
+                                    unmatched_index_dict[index1_record[1]] = 1
                             # indexes are matching; passed quality score cutoff
                             elif index1_record[1] == rev_comp_index2:           
                                 for a_key in files_dict:
